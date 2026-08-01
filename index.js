@@ -1,1 +1,27 @@
-const express=require('express');const bodyParser=require('body-parser');const axios=require('axios');const app=express();app.use(bodyParser.json());const TOKEN=process.env.WHATSAPP_TOKEN;const VERIFY_TOKEN="goldenaxes9266";const PHONE_ID="923809060741931";app.get('/webhook',(req,res)=>{if(req.query['hub.verify_token']===VERIFY_TOKEN){res.send(req.query['hub.challenge']);}else{res.sendStatus(403);}});app.post('/webhook',async(req,res)=>{try{const entry=req.body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];if(entry){const from=entry.from;const msg=entry.text?.body||"Hi";await axios.post(`https://graph.facebook.com/v20.0/${PHONE_ID}/messages`,{messaging_product:"whatsapp",to:from,text:{body:`Namaste! Golden Axes 9266! Aapne likha: ${msg}. Team contact karegi. Type 1=Health 2=Life` }},{headers:{Authorization:`Bearer ${TOKEN}`}});}res.sendStatus(200);}catch(e){res.sendStatus(200);}});app.get('/',(req,res)=>res.send('GoldenAxes Bot LIVE'));app.listen(process.env.PORT||3000);
+const express = require('express');
+const app = express();
+app.use(express.json());
+
+const VERIFY_TOKEN = process.env.VERIFY_TOKEN || "goldenaxes123";
+
+app.get('/', (req,res) => res.send('Golden Axes Bot Live'));
+
+app.get('/webhook', (req,res) => {
+  const mode = req.query['hub.mode'];
+  const token = req.query['hub.verify_token'];
+  const challenge = req.query['hub.challenge'];
+  if (mode === 'subscribe' && token === VERIFY_TOKEN) {
+    console.log('WEBHOOK VERIFIED');
+    res.status(200).send(challenge);
+  } else {
+    res.sendStatus(403);
+  }
+});
+
+app.post('/webhook', (req,res) => {
+  console.log(JSON.stringify(req.body, null, 2));
+  res.sendStatus(200);
+});
+
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => console.log('Bot running on '+PORT));
